@@ -49,7 +49,7 @@ CREATE TABLE TypeQuestion(
 );
 CREATE TABLE CategoryQuestion(
 	CategoryId				TINYINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-	CategoryName			VARCHAR(50) NOT NULL
+	CategoryName			VARCHAR(50) NOT NULL UNIQUE KEY
 );
 CREATE TABLE Question(
 	QuestionId				TINYINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
@@ -61,6 +61,7 @@ CREATE TABLE Question(
     FOREIGN KEY(TypeId) 	REFERENCES TypeQuestion(TypeId),
     FOREIGN KEY(CreatorId) 	REFERENCES `Account`(AccountId)
 );
+DROP DATABASE IF EXISTS Answer;
 CREATE TABLE Answer(
 	AnswerId				TINYINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
 	Content					VARCHAR(50) NOT NULL UNIQUE KEY,
@@ -78,29 +79,55 @@ CREATE TABLE Exam(
 	ExamId					TINYINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
 	`Code`					VARCHAR(50) NOT NULL UNIQUE KEY,
     Title				    VARCHAR(50) NOT NULL UNIQUE KEY,
-    CategoryId				TINYINT UNSIGNED NOT NULL,
-    Duration				TINYINT UNSIGNED NOT NULL,
+    CategoryId				TINYINT UNSIGNED NOT NULL ,
+    Duration				VARCHAR(3) NOT NULL,
     CreatorId				TINYINT UNSIGNED NOT NULL,
-    CreateDate				DATETIME DEFAULT NOW(),
-    FOREIGN KEY(CategoryId) REFERENCES CategoryQuestion(CategoryId),
+	CreateDate				DATETIME DEFAULT NOW(), 
+    -- CONSTRAINT fk_CategoryQuestion FOREIGN KEY(CategoryId) REFERENCES CategoryQuestion(CategoryId),
 	FOREIGN KEY(CreatorId) 	REFERENCES `Account`(AccountId)
 );
 CREATE TABLE ExamQuestion(
 	ExamId					TINYINT UNSIGNED,
-	QuestionId		 	TINYINT UNSIGNED NOT NULL UNIQUE KEY,
-	FOREIGN KEY(ExamId) REFERENCES Exam(ExamId),
-	FOREIGN KEY(QuestionId) 	REFERENCES Question(QuestionId),
+	QuestionId		 		TINYINT UNSIGNED NOT NULL UNIQUE KEY,
+	FOREIGN KEY(ExamId) 	REFERENCES Exam(ExamId),
+	FOREIGN KEY(QuestionId) REFERENCES Question(QuestionId),
     PRIMARY KEY(ExamId,QuestionId)
 );
-INSERT INTO Department(DepartmentName)
-  VALUES 				(N'Hoai'),
-						(N'Nhan1'),
-                        (N'Nhan2'),
-                        (N'Nhan3'),
-                        (N'Nhan4'),
-                        (N'Nhan5'),
-                        (N'Nhan6'),
-                        (N'Nhan7')
+ALTER TABLE Exam ADD CONSTRAINT fk_CategoryQuestion FOREIGN KEY (CategoryId) REFERENCES CategoryQuestion(CategoryId);
+-- INSERT INTO Department(DepartmentName)
+--   VALUES 				(N'Hoai'),
+-- 						(N'Nhan1'),
+--                         (N'Nhan2'),
+--                         (N'Nhan3'),
+--                         (N'Nhan4'),
+--                         (N'Nhan5'),
+--                         (N'Nhan6'),
+--                         (N'Nhan7');
+
+-- INSERT INTO Exam(`Code`,Title,CategoryId,Duration,CreatorId)
+--   VALUES                ('100','De thi 1',1,'90p',1),
+-- 						('101','De thi 2',2,'90p',3),
+-- 						('110','De thi 3',3,'90p',5),	
+--                         ('111','De thi 4',4,'90p',8),
+--                         ('000','De thi 5',5,'90p',13),
+--                         ('001','De thi 6',6,'90p',21),
+--                         ('010','De thi 7',7,'90p',34),
+--                         ('011','De thi 8',8,'90p',55),
+--                         ('1000','De thi 9',9,'90p',89),
+--                         ('1001','De thi 10',10,'90p',100);
+INSERT INTO CategoryQuestion(CategoryName)
+  VALUES				('Java'),
+						('.NET'),
+						('Ruby'),
+						('Csharp'),
+						('JavaScript'),
+						('Html'),
+						('Css'),
+						('SQL'),
+						('Postman'),
+						('C++');
+
+                        
                         
 
   
