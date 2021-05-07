@@ -19,8 +19,8 @@ AS (
 SELECT * FROM `account` AS a
 WHERE DepartmentID = 3
 )
-SELECT  * FROM `account`
-WHERE LENGTH(a.FullName) = (SELECT MAX(length(a.FullName)) * FROM CTE_MaxFullDep3);
+SELECT * FROM `account` a
+WHERE LENGTH(a.FullName) = (SELECT MAX(length(a.FullName)) * FROM (CTE_MaxFullDep3));
 -- Question 6: Lấy ra tên group đã tham gia trước ngày 20/07/2020 --
 SELECT *
 FROM TestingSystem.`group`

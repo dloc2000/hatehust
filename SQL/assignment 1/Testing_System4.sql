@@ -21,12 +21,13 @@ GROUP BY a.DepartmentID
 HAVING Count(a.DepartmentID) > 3;
 
 -- Question 5: Viết lệnh để lấy ra danh sách câu hỏi được sử dụng trong đề thi nhiều nhất
-SELECT q.Content,COUNT(eq.QuestionID) FROM examquestion eq
+SELECT q.Content,COUNT(eq.QuestionID) AS number_of_question FROM examquestion eq
 INNER JOIN question q ON q.QuestionID = eq.QuestionID
 GROUP BY eq.QuestionID
-HAVING COUNT(eq.QuestionID)
-ORDER BY COUNT(eq.QuestionID) DESC
-LIMIT 1;
+HAVING COUNT(eq.QuestionID) = ( SELECT MAX(number_of_question) FROM (SELECT COUNT(eq.QuestionID) AS number_of_question FROM examquestion eq
+																		INNER JOIN question q ON q.QuestionID = eq.QuestionID
+																		GROUP BY eq.QuestionID) AS TEMP );
+
 
 -- Question 6: Thông kê mỗi category Question được sử dụng trong bao nhiêu Question
 SELECT q.QuestionID,COUNT(cq.CategoryID) FROM question q
@@ -40,12 +41,12 @@ GROUP BY QuestionID
 HAVING count(QuestionID);
 
 -- Question 8: Lấy ra Question có nhiều câu trả lời nhất
-SELECT a.Content,count(a.QuestionID),q.Content  FROM answer a
+SELECT a.Content,count(a.QuestionID) AS number_of_answer ,q.Content  FROM answer a
 INNER JOIN question q ON a.QuestionID = q.QuestionID
 GROUP BY a.QuestionID
-HAVING count(a.QuestionID)
-ORDER BY COUNT(a.QuestionID) DESC
-LIMIT 1;
+HAVING count(a.QuestionID) = (SELECT MAX(number_of_answer) FROM (SELECT count(a.QuestionID) AS number_of_answer ,q.Content  FROM answer a
+																INNER JOIN question q ON a.QuestionID = q.QuestionID
+																GROUP BY a.QuestionID) AS temp);
 
 -- Question 9: Thống kê số lượng account trong mỗi group 
 SELECT ga.GroupID, g.GroupName,count(ga.GroupID) FROM groupaccount ga
@@ -54,12 +55,12 @@ INNER JOIN `group` g ON g.GroupID = ga.GroupID
 GROUP BY ga.GroupID
 HAVING count(ga.GroupID);
 -- Question 10: Tìm chức vụ có ít người nhất
-SELECT p.PositionName,count(a.PositionID) FROM `account` a
+SELECT p.PositionName,count(a.PositionID) AS number_of_position FROM `account` a
 INNER JOIN `position` p ON p.PositionID = a.PositionID
 GROUP BY a.PositionID
-HAVING count(a.PositionID)
-ORDER BY count(a.PositionID) ASC
-LIMIT 1;
+HAVING count(a.PositionID) = (SELECT MIN(number_of_position) FROM (SELECT p.PositionName,count(a.PositionID) AS number_of_position FROM `account` a
+																			INNER JOIN `position` p ON p.PositionID = a.PositionID
+																			GROUP BY a.PositionID) AS temp);
 -- Question 11: Thống kê mỗi phòng ban có bao nhiêu dev, test, scrum master, PM
 SELECT d.DepartmentID , d.DepartmentName, p.positionName , count(p.positionName)  FROM `account` a
 INNER JOIN department d ON a.DepartmentID = d.DepartmentID
