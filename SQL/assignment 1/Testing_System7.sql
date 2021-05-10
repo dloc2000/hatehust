@@ -11,7 +11,9 @@ DELIMITER $$
             SET MESSAGE_TEXT = " Cant insert data ";
             END IF;
         END$$
-DELIMITER ;        
+DELIMITER ; 
+INSERT INTO `group`(`GroupName` , `CreatorID` ,`CreateDate`)
+VALUES				('2' ,  '1' , '2020-03-07 00:00:00');       
 -- Question 2: Tạo trigger Không cho phép người dùng thêm bất kỳ user nào vào
 -- 				department "Sale" nữa, khi thêm thì hiện ra thông báo "Department
 --  			"Sale" cannot add more user"
@@ -25,7 +27,7 @@ DELIMITER $$
             SELECT d.DepartmentID INTO v_depID FROM `department` d WHERE d.DepartmentName = 'Sale';
 				IF (NEW.DepartmentID = v_depID) THEN
                 SIGNAL SQLSTATE '12345'
-                SET MESSAGE_TEXT = 'khong them duoc dau con a ';
+                SET MESSAGE_TEXT = 'cannot add more user ';
             END IF;    
        
         
@@ -128,8 +130,16 @@ DELIMITER $$
 	END$$
 DELIMITER ;
  
-
 -- Question 10: Viết trigger chỉ cho phép người dùng chỉ được update, delete các question khi question đó chưa nằm trong exam nào
+DROP TRIGGER IF EXISTS Trg_notDelExam ;
+DELIMITER $$
+	CREATE TRIGGER Trg_notDelExam
+	BEFORE DELETE ON `examquestion`
+	FOR EACH ROW
+	BEGIN 
+		IF(NEW.question	
+	END$$
+DELIMITER ;
  
 -- Question 12: Lấy ra thông tin exam trong đó:
 -- Duration <= 30 thì sẽ đổi thành giá trị "Short time"
