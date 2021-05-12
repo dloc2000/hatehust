@@ -135,10 +135,6 @@ DELIMITER ;
  END$$
  DELIMITER ;
  CALL sp_getNameAccOrGroup('VTI' , 1);
-
- 
- 
- 
 -- Question 7: Viết 1 store cho phép người dùng nhập vào thông tin fullName, email và trong store sẽ tự động gán:
 				-- username sẽ giống email nhưng bỏ phần @..mail đi
 				-- positionID: sẽ có default là developer
@@ -248,8 +244,6 @@ Call SP_DelDepFromName('Marketing');
 	 END$$
 DELIMITER ;
 CALL sp_questionOfMonth() ;
- 
- 
  
  -- Question 13: Viết store để in ra mỗi tháng có bao nhiêu câu hỏi được tạo trong 6 tháng gần đây nhất
 				-- (Nếu tháng nào không có thì sẽ in ra là "không có câu hỏi nào trong tháng")

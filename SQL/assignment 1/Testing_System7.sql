@@ -45,8 +45,8 @@ DELIMITER $$
             BEGIN
 				DECLARE countUser TINYINT DEFAULT 0;
                 SELECT  count(ga.GroupID) INTO countUser  FROM `groupaccount` ga 
-                GROUP BY ga.GroupID;
-                IF(countUser > 5) THEN
+                WHERE ga.GroupID = NEW.GroupID;
+                IF(countUser >= 5) THEN
 					SIGNAL SQLSTATE '12345'
 					SET MESSAGE_TEXT = 'cant insert user';
 				END IF;    
@@ -72,7 +72,6 @@ DELIMITER $$
             END$$
 DELIMITER ;   
 
-
 -- Question 5: Tạo trigger không cho phép người dùng xóa tài khoản có email là admin@gmail.com 
 --             (đây là tài khoản admin, không cho phép user xóa),
 --             còn lại các tài khoản khác thì sẽ cho phép xóa và sẽ xóa tất cả các thông tin liên quan tới user đó
@@ -90,14 +89,25 @@ DELIMITER $$
             END IF;    
 	END$$
 DELIMITER ;
- 
  DELETE FROM `account` WHERE (AccountID = '12');
- 
-
-
 -- Question 6: Không sử dụng cấu hình default cho field DepartmentID của table Account
 -- hãy tạo trigger cho phép người dùng khi tạo account không điền vào departmentID thì sẽ được phân vào phòng ban "waiting Department"
- 
+DROP TRIGGER IF EXISTS Trg_SetDepWaittingRoom;
+DELIMITER $$
+CREATE TRIGGER Trg_SetDepWaittingRoom
+BEFORE INSERT ON `account`
+FOR EACH ROW
+		BEGIN
+                DECLARE v_WaittingRoom TINYINT;
+				SELECT D.DepartmentID INTO v_WaittingRoom FROM department D WHERE
+				D.DepartmentName = 'Waitting Room';
+				IF (NEW.DepartmentID IS NULL ) THEN
+				SET NEW.DepartmentID = v_WaittingRoom;
+				END IF;
+        END $$
+DELIMITER ;
+INSERT INTO `testingsystem`.`account` (`Email`, `Username`, `FullName`, `PositionID`,`CreateDate`)
+VALUES ('1','1', '1', '1', NOW());      
 -- Question 7: Cấu hình 1 bài thi chỉ cho phép user tạo tối đa 4 answers cho mỗi question, trong đó có tối đa 2 đáp án đúng.
  DROP TRIGGER IF EXISTS Trg_insAnsForQues ;
 DELIMITER $$
@@ -105,16 +115,34 @@ DELIMITER $$
 	BEFORE INSERT ON `question`
 	FOR EACH ROW
 	BEGIN 
-			
-	END$$
-DELIMITER ;
- 
- 
- 
+		 DECLARE v_CountAnsInQues TINYINT;
+		 DECLARE v_CountAnsIsCorrects TINYINT;
+		 SELECT count(A.QuestionID) INTO v_CountAnsInQues FROM answer A WHERE A.QuestionID = NEW.QuestionID;		
+		 SELECT count(1) INTO v_CountAnsIsCorrects FROM answer A WHERE (A.QuestionID = NEW.QuestionID ) AND (A.isCorrect = NEW.isCorrect);
+		 IF (v_CountAnsInQues > 4 ) OR (v_CountAnsIsCorrects >2) THEN
+		SIGNAL SQLSTATE '12345'
+		SET MESSAGE_TEXT = 'Ko the tao duoc bai thi';
+		 END IF;
+END $$
+DELIMITER ;		
+
 -- Question 8: Viết trigger sửa lại dữ liệu cho đúng:
 -- Nếu người dùng nhập vào gender của account là nam, nữ, chưa xác định
 -- Thì sẽ đổi lại thành M, F, U cho giống với cấu hình ở database
-
+DROP TRIGGER IF EXISTS Trg_GenderFromInput;
+DELIMITER $$
+		CREATE TRIGGER Trg_GenderFromInput
+        BEFORE INSERT ON `account`
+        FOR EACH ROW
+        BEGIN
+			IF(NEW.gender = 'Nam') THEN
+            SET NEW.gender = 'M';
+            ELSEIF NEW.Gender = 'Nu' THEN
+			SET NEW.Gender = 'F';
+			ELSEIF NEW.Gender = 'Chưa xác định' THEN
+			SET NEW.Gender = 'U';
+			END IF ;
+        END$$
 
 -- Question 9: Viết trigger không cho phép người dùng xóa bài thi mới tạo được 2 ngày
 DROP TRIGGER IF EXISTS Trg_notDelExam ;
@@ -137,7 +165,13 @@ DELIMITER $$
 	BEFORE DELETE ON `examquestion`
 	FOR EACH ROW
 	BEGIN 
-		IF(NEW.question	
+		 DECLARE v_CountQuesByID TINYINT;
+		 SET v_CountQuesByID = -1;
+		 SELECT count(1) INTO v_CountQuesByID FROM examquestion ex WHERE ex.QuestionID = NEW.QuestionID;
+		 IF (v_CountQuesByID != -1) THEN
+		 SIGNAL SQLSTATE '12345'
+		 SET MESSAGE_TEXT = 'Cant Update This Question';
+		 END IF ; 
 	END$$
 DELIMITER ;
  
@@ -145,16 +179,37 @@ DELIMITER ;
 -- Duration <= 30 thì sẽ đổi thành giá trị "Short time"
 -- 30 < Duration <= 60 thì sẽ đổi thành giá trị "Medium time"
 -- Duration > 60 thì sẽ đổi thành giá trị "Long time"
-
+SELECT * FROM `exam`;
+SELECT e.ExamID, e.code, e.Title , CASE
+						WHEN Duration <= 30 THEN 'Short time '
+                        WHEN Duration <= 60 THEN 'Medium time'
+                        ELSE 'Long time'
+                        END AS Duration , e.CreateDate
+FROM exam e;
+SELECT e.ExamID, e.code, e.Title , e.Duration FROM exam e;
 
 
 -- Question 13: Thống kê số account trong mỗi group và in ra thêm 1 column nữa có tên là the_number_user_amount và mang giá trị được quy định như sau:
 -- Nếu số lượng user trong group =< 5 thì sẽ có giá trị là few
 -- Nếu số lượng user trong group <= 20 và > 5 thì sẽ có giá trị là normal
 -- Nếu số lượng user trong group > 20 thì sẽ có giá trị là higher
-
-
-
+SELECT ga.AccountID ,COUNT(ga.GroupID), CASE
+			WHEN ga.Username <= 5  THEN 'few'
+            WHEN ga.Username <= 20 THEN 'normal'
+			ELSE 'higer'
+			END AS the_number_user_amount
+FROM `groupaccount`ga
+GROUP BY ga.GroupID;
 
 -- Question 14: Thống kê số mỗi phòng ban có bao nhiêu user, nếu phòng ban nào không có user thì sẽ thay đổi giá trị 0 thành "Không có User"
-        
+	SELECT d.DepartmentName, CASE
+						WHEN COUNT(a.DepartmentID) = 0 THEN 'khong cos User'
+                        ELSE COUNT(a.DepartmentID)
+                        END AS SL
+  FROM department d  
+  LEFT JOIN `account` a ON d.departmentID = a.departmentID
+  GROUP BY d.departmentID
+    
+
+    
+    
