@@ -17,12 +17,13 @@ HAVING COUNT(hd.Id_SV);
 --    mã số, họ tên và tên đề tài
 --   (Nếu sinh viên chưa có đề tài thì column tên đề tài sẽ in ra "Chưa có")
 CREATE OR REPLACE VIEW SinhVienInfo AS
-	
 	 SELECT sv.Id_SV,sv.Ten_SV,dt.Ten_DeTai FROM huongdan hd
 	 JOIN sinhvien sv      ON sv.Id_SV = hd.Id_SV
-	 LEFT JOIN detai dt    ON dt.Id_DeTai = hd.Id_DeTai
-
-;
+	 JOIN detai dt         ON dt.Id_DeTai = hd.Id_DeTai
+     UNION
+     SELECT sv.Id_SV,sv.Ten_SV, 'Chua co' FROM sinhvien sv
+     LEFT JOIN huongdan hd ON sv.Id_SV = hd.Id_SV
+     WHERE hd.Id_SV IS NULL;
 -- 4. Tạo trigger cho table SinhVien khi insert sinh viên có năm sinh <= 1950
 -- thì hiện ra thông báo "Moi ban kiem tra lai nam sinh"
 DROP TRIGGER IF EXISTS Trg_KiemTraNamSinh;
@@ -41,7 +42,7 @@ INSERT INTO `ql_doan`.`sinhvien`(`Ten_SV` , `NamSinh` , `QueQuan`)
 		VALUES					('sinhvien11' , '1988' ,'Hatay');	
 -- 5. Hãy cấu hình table sao cho khi xóa 1 sinh viên nào đó thì sẽ tất cả thông
 -- tin trong table HuongDan liên quan tới sinh viên đó sẽ bị xóa đi
-ALTER TABLE huongdan DROP CONSTRAINT fk_hd_SinhVien;
+ALTER TABLE huongdan DROP FOREIGN KEY fk_hd_SinhVien;
 ALTER TABLE huongdan ADD CONSTRAINT  fk_hd_SinhVien FOREIGN KEY(Id_SV)
 REFERENCES sinhvien(Id_SV) ON DELETE CASCADE;
 
