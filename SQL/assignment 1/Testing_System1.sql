@@ -69,12 +69,7 @@ CREATE TABLE Answer(
     isCorrect 				ENUM('True','False'),
     FOREIGN KEY(QuestionId) REFERENCES Question(QuestionId)
 );
-CREATE TABLE Answer(
-	AnswerId				TINYINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-	Content					VARCHAR(50) NOT NULL UNIQUE KEY,
-    QuestionId				TINYINT UNSIGNED NOT NULL,
-    isCorrect 				ENUM('True','False')
-);
+
 CREATE TABLE Exam(
 	ExamId					TINYINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
 	`Code`					VARCHAR(50) NOT NULL UNIQUE KEY,
