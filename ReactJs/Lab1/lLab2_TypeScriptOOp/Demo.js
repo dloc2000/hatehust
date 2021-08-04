@@ -1,0 +1,10 @@
+"use strict";
+exports.__esModule = true;
+var Account_1 = require("./Account");
+var Department_1 = require("./Department");
+var Position_1 = require("./Position");
+var date = new Date();
+var dep1 = new Department_1.Department(1, "Bao ve");
+var pos1 = new Position_1.Position(2, "Dev");
+var acc1 = new Account_1.Account(1, "email1@vti.com", "dloc2000", "DXL", dep1, pos1, date);
+console.log(acc1);
